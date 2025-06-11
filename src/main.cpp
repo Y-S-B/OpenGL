@@ -163,11 +163,11 @@ void cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
     int windowWidth, windowHeight;
     glfwGetWindowSize(window, &windowWidth, &windowHeight);
     
-    // Convert button position from normalized coordinates to screen coordinates
-    float buttonX1 = (0.7f + 1.0f) * 0.5f * windowWidth;  // -0.2 in normalized -> 0.4 in screen
-    float buttonY1 = (0.85f + 1.0f) * 0.5f * windowHeight; // -0.95 in normalized -> 0.025 in screen
-    float buttonX2 = (0.9f + 1.0f) * 0.5f * windowWidth;   // 0.2 in normalized -> 0.6 in screen
-    float buttonY2 = (0.95f + 1.0f) * 0.5f * windowHeight; // -0.85 in normalized -> 0.075 in screen
+    // Button position and size (bottom right corner)
+    float buttonX1 = windowWidth - 120;
+    float buttonY1 = windowHeight - 50;
+    float buttonX2 = windowWidth - 20;
+    float buttonY2 = windowHeight - 20;
     
     buttonHovered = (xpos >= buttonX1 && xpos <= buttonX2 && ypos >= buttonY1 && ypos <= buttonY2);
 }
@@ -372,52 +372,52 @@ void drawWinningLine(int row1, int col1, int row2, int col2, unsigned int shader
 
 void drawButton(unsigned int shaderProgram)
 {
-    // Button coordinates (centered at bottom, below the grid)
+    // Button coordinates (bottom right corner)
     float buttonVertices[] = {
         // Button background (rectangle)
-        -0.2f, -0.95f,
-         0.2f, -0.95f,
-         0.2f, -0.85f,
-        -0.2f, -0.85f,
+        0.7f, -0.9f,
+        0.9f, -0.9f,
+        0.9f, -0.8f,
+        0.7f, -0.8f,
         
         // R letter (for "Restart")
-        -0.18f, -0.89f, -0.18f, -0.87f,  // R vertical line
-        -0.18f, -0.87f, -0.15f, -0.87f,  // R top horizontal
-        -0.18f, -0.88f, -0.15f, -0.88f,   // R middle horizontal
-        -0.15f, -0.88f, -0.15f, -0.89f,  // R diagonal
+        0.72f, -0.85f, 0.72f, -0.82f,  // R vertical line
+        0.72f, -0.82f, 0.75f, -0.82f,  // R top horizontal
+        0.72f, -0.835f, 0.75f, -0.835f, // R middle horizontal
+        0.75f, -0.835f, 0.75f, -0.85f,  // R diagonal
         
         // E letter
-        -0.14f, -0.89f, -0.14f, -0.87f,   // E vertical
-        -0.14f, -0.87f, -0.11f, -0.87f,   // E top
-        -0.14f, -0.88f, -0.11f, -0.88f,   // E middle
-        -0.14f, -0.89f, -0.11f, -0.89f,   // E bottom
+        0.76f, -0.85f, 0.76f, -0.82f,   // E vertical
+        0.76f, -0.82f, 0.79f, -0.82f,   // E top
+        0.76f, -0.835f, 0.79f, -0.835f, // E middle
+        0.76f, -0.85f, 0.79f, -0.85f,   // E bottom
         
         // S letter
-        -0.10f, -0.87f, -0.07f, -0.87f,   // S top
-        -0.10f, -0.87f, -0.10f, -0.88f,   // S left top
-        -0.10f, -0.88f, -0.07f, -0.88f,   // S middle
-        -0.07f, -0.88f, -0.07f, -0.89f,  // S right bottom
-        -0.10f, -0.89f, -0.07f, -0.89f,   // S bottom
+        0.80f, -0.82f, 0.83f, -0.82f,   // S top
+        0.80f, -0.82f, 0.80f, -0.835f,  // S left top
+        0.80f, -0.835f, 0.83f, -0.835f, // S middle
+        0.83f, -0.835f, 0.83f, -0.85f,  // S right bottom
+        0.80f, -0.85f, 0.83f, -0.85f,    // S bottom
         
         // T letter
-        -0.06f, -0.87f, -0.03f, -0.87f,  // T top
-        -0.045f, -0.87f, -0.045f, -0.89f, // T vertical
+        0.84f, -0.82f, 0.87f, -0.82f,   // T top
+        0.855f, -0.82f, 0.855f, -0.85f, // T vertical
         
         // A letter
-        -0.02f, -0.89f, -0.02f, -0.87f,  // A left
-        -0.02f, -0.87f, 0.01f, -0.87f,    // A top
-        0.01f, -0.87f, 0.01f, -0.89f,    // A right
-        -0.02f, -0.88f, 0.01f, -0.88f,    // A middle
+        0.88f, -0.85f, 0.88f, -0.82f,   // A left
+        0.88f, -0.82f, 0.91f, -0.82f,   // A top
+        0.91f, -0.82f, 0.91f, -0.85f,  // A right
+        0.88f, -0.835f, 0.91f, -0.835f, // A middle
         
         // R letter (second)
-        0.02f, -0.89f, 0.02f, -0.87f,    // R vertical
-        0.02f, -0.87f, 0.05f, -0.87f,     // R top
-        0.02f, -0.88f, 0.05f, -0.88f,     // R middle
-        0.05f, -0.88f, 0.05f, -0.89f,     // R diagonal
+        0.92f, -0.85f, 0.92f, -0.82f,   // R vertical
+        0.92f, -0.82f, 0.95f, -0.82f,   // R top
+        0.92f, -0.835f, 0.95f, -0.835f, // R middle
+        0.95f, -0.835f, 0.95f, -0.85f,  // R diagonal
         
         // T letter (second)
-        0.06f, -0.87f, 0.09f, -0.87f,     // T top
-        0.075f, -0.87f, 0.075f, -0.89f   // T vertical
+        0.96f, -0.82f, 0.99f, -0.82f,   // T top
+        0.975f, -0.82f, 0.975f, -0.85f // T vertical
     };
 
     unsigned int VBO, VAO;
@@ -534,4 +534,4 @@ void resetGame()
     gameOver = false;
     moveCount = 0;
     winRow1 = winCol1 = winRow2 = winCol2 = -1;
-} 
+}
