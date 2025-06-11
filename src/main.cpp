@@ -5,6 +5,7 @@
 #include <cmath>
 #include <string>
 
+
 // Game constants
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 800;
@@ -20,7 +21,10 @@ int moveCount = 0;
 int winRow1 = -1, winCol1 = -1, winRow2 = -1, winCol2 = -1;
 
 // Button state
-bool buttonHovered = false;
+float restartBtnX = -0.25f; // Bottom center
+float restartBtnY = -0.9f;
+float restartBtnWidth = 0.5f;
+float restartBtnHeight = 0.15f;
 
 // Shader sources
 const char *vertexShaderSource = "#version 330 core\n"
@@ -42,15 +46,15 @@ const char *fragmentShaderSource = "#version 330 core\n"
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow *window);
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
-void cursor_position_callback(GLFWwindow* window, double xpos, double ypos);
 void renderBoard(unsigned int shaderProgram);
 void drawX(float x, float y, unsigned int shaderProgram);
 void drawO(float x, float y, unsigned int shaderProgram);
 void drawGrid(unsigned int shaderProgram);
 void drawWinningLine(int row1, int col1, int row2, int col2, unsigned int shaderProgram);
-void drawButton(unsigned int shaderProgram);
 void checkWin();
 void resetGame();
+void drawRestartButton(unsigned int shaderProgram);
+
 
 int main()
 {
@@ -71,7 +75,6 @@ int main()
     glfwMakeContextCurrent(window);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     glfwSetMouseButtonCallback(window, mouse_button_callback);
-    glfwSetCursorPosCallback(window, cursor_position_callback);
 
     // Load OpenGL functions
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
@@ -114,19 +117,19 @@ int main()
         if (gameOver && winRow1 != -1)
             drawWinningLine(winRow1, winCol1, winRow2, winCol2, shaderProgram);
 
-        // Draw the restart button
-        drawButton(shaderProgram);
-
+        drawRestartButton(shaderProgram);
+        
+       
         // Update window title if game is over
         if (gameOver)
         {
             if (moveCount == BOARD_SIZE * BOARD_SIZE)
-                glfwSetWindowTitle(window, "Tic-Tac-Toe - Draw! Click Restart or press R to restart.");
+                glfwSetWindowTitle(window, "Tic-Tac-Toe - Draw! Press R to restart.");
             else
             {
                 std::string title = "Tic-Tac-Toe - Player ";
                 title += currentPlayer;
-                title += " Wins! Click Restart or press R to restart.";
+                title += " Wins! Press R to restart.";
                 glfwSetWindowTitle(window, title.c_str());
             }
         }
@@ -157,39 +160,31 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
     glViewport(0, 0, width, height);
 }
 
-void cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
-{
-    // Check if cursor is over the button
-    int windowWidth, windowHeight;
-    glfwGetWindowSize(window, &windowWidth, &windowHeight);
-    
-    // Button position and size (bottom right corner)
-    float buttonX1 = windowWidth - 120;
-    float buttonY1 = windowHeight - 50;
-    float buttonX2 = windowWidth - 20;
-    float buttonY2 = windowHeight - 20;
-    
-    buttonHovered = (xpos >= buttonX1 && xpos <= buttonX2 && ypos >= buttonY1 && ypos <= buttonY2);
-}
-
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
     if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
     {
-        if (buttonHovered)
+        double xpos, ypos;
+        glfwGetCursorPos(window, &xpos, &ypos);
+
+        int windowWidth, windowHeight;
+        glfwGetWindowSize(window, &windowWidth, &windowHeight);
+
+        // Convert click to OpenGL coordinates
+        float normX = (xpos / windowWidth) * 2 - 1;
+        float normY = 1 - (ypos / windowHeight) * 2;
+
+        // Check if inside button area
+        if (normX >= restartBtnX && normX <= restartBtnX + restartBtnWidth &&
+            normY >= restartBtnY && normY <= restartBtnY + restartBtnHeight)
         {
             resetGame();
-            return;
+            return; // Don't process board clicks if restart was clicked
         }
-        
+
+        // Only allow moves if not game over
         if (!gameOver)
         {
-            double xpos, ypos;
-            glfwGetCursorPos(window, &xpos, &ypos);
-
-            int windowWidth, windowHeight;
-            glfwGetWindowSize(window, &windowWidth, &windowHeight);
-
             float cellWidth = windowWidth / (float)BOARD_SIZE;
             float cellHeight = windowHeight / (float)BOARD_SIZE;
 
@@ -370,57 +365,41 @@ void drawWinningLine(int row1, int col1, int row2, int col2, unsigned int shader
     glDeleteBuffers(1, &VBO);
 }
 
-void drawButton(unsigned int shaderProgram)
+void drawRestartButton(unsigned int shaderProgram)
 {
-    // Button coordinates (bottom right corner)
-    float buttonVertices[] = {
-        // Button background (rectangle)
-        0.7f, -0.9f,
-        0.9f, -0.9f,
-        0.9f, -0.8f,
-        0.7f, -0.8f,
-        
-        // R letter (for "Restart")
-        0.72f, -0.85f,
-        0.72f, -0.82f,
-        0.75f, -0.82f,
-        0.75f, -0.84f,
-        0.72f, -0.84f,
-        0.75f, -0.85f
+    float vertices[] = {
+        restartBtnX, restartBtnY,
+        restartBtnX + restartBtnWidth, restartBtnY,
+        restartBtnX + restartBtnWidth, restartBtnY + restartBtnHeight,
+        restartBtnX, restartBtnY + restartBtnHeight
     };
 
-    unsigned int VBO, VAO;
+    unsigned int indices[] = { 0, 1, 2, 2, 3, 0 };
+
+    unsigned int VBO, VAO, EBO;
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
 
     glBindVertexArray(VAO);
+
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(buttonVertices), buttonVertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
-    // Draw button background
     int vertexColorLocation = glGetUniformLocation(shaderProgram, "ourColor");
-    if (buttonHovered)
-        glUniform3f(vertexColorLocation, 0.8f, 0.8f, 0.8f); // Light gray when hovered
-    else
-        glUniform3f(vertexColorLocation, 0.9f, 0.9f, 0.9f); // Light gray
+    glUniform3f(vertexColorLocation, 0.8f, 0.8f, 0.8f); // Light gray button
 
-    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-
-    // Draw button border
-    glUniform3f(vertexColorLocation, 0.0f, 0.0f, 0.0f); // Black
-    glDrawArrays(GL_LINE_LOOP, 0, 4);
-
-    // Draw "R" text
-    glUniform3f(vertexColorLocation, 0.0f, 0.0f, 0.0f); // Black
-    glLineWidth(2.0f);
-    glDrawArrays(GL_LINE_STRIP, 4, 6);
-    glLineWidth(1.0f);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
+    glDeleteBuffers(1, &EBO);
 }
 
 void checkWin()
@@ -487,4 +466,4 @@ void resetGame()
     gameOver = false;
     moveCount = 0;
     winRow1 = winCol1 = winRow2 = winCol2 = -1;
-} 
+}
