@@ -1,0 +1,14 @@
+[
+{
+  "directory": "C:/Users/User/Documents/3rd year second sem/CG/Tic Tac Toe/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/tictactoe.dir/includes_CXX.rsp -g -std=gnu++17 -o CMakeFiles\\tictactoe.dir\\src\\main.cpp.obj -c \"C:\\Users\\User\\Documents\\3rd year second sem\\CG\\Tic Tac Toe\\src\\main.cpp\"",
+  "file": "C:/Users/User/Documents/3rd year second sem/CG/Tic Tac Toe/src/main.cpp",
+  "output": "CMakeFiles/tictactoe.dir/src/main.cpp.obj"
+},
+{
+  "directory": "C:/Users/User/Documents/3rd year second sem/CG/Tic Tac Toe/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\gcc.exe  @CMakeFiles/tictactoe.dir/includes_C.rsp -g -o CMakeFiles\\tictactoe.dir\\src\\glad.c.obj -c \"C:\\Users\\User\\Documents\\3rd year second sem\\CG\\Tic Tac Toe\\src\\glad.c\"",
+  "file": "C:/Users/User/Documents/3rd year second sem/CG/Tic Tac Toe/src/glad.c",
+  "output": "CMakeFiles/tictactoe.dir/src/glad.c.obj"
+}
+]
