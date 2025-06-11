@@ -19,6 +19,12 @@ int moveCount = 0;
 // Winning line state
 int winRow1 = -1, winCol1 = -1, winRow2 = -1, winCol2 = -1;
 
+// Restart button 
+const float btnLeft = -0.2f;
+const float btnRight = 0.2f;
+const float btnTop = -0.85f;
+const float btnBottom = -0.95f;
+
 // Shader sources
 const char *vertexShaderSource = "#version 330 core\n"
     "layout (location = 0) in vec2 aPos;\n"
@@ -150,7 +156,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
-    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && !gameOver)
+    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
     {
         double xpos, ypos;
         glfwGetCursorPos(window, &xpos, &ypos);
@@ -158,21 +164,37 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
         int windowWidth, windowHeight;
         glfwGetWindowSize(window, &windowWidth, &windowHeight);
 
-        float cellWidth = windowWidth / (float)BOARD_SIZE;
-        float cellHeight = windowHeight / (float)BOARD_SIZE;
+        // Convert to OpenGL coords (-1 to 1)
+        float xNDC = (float)xpos / windowWidth * 2.0f - 1.0f;
+        float yNDC = 1.0f - (float)ypos / windowHeight * 2.0f;
 
-        int col = xpos / cellWidth;
-        int row = ypos / cellHeight;
-
-        if (row >= 0 && row < BOARD_SIZE && col >= 0 && col < BOARD_SIZE && board[row][col] == ' ')
+        // Check if click was on restart button
+        if (xNDC >= btnLeft && xNDC <= btnRight && yNDC >= btnBottom && yNDC <= btnTop)
         {
-            board[row][col] = currentPlayer;
-            moveCount++;
-            checkWin();
-            if (!gameOver) currentPlayer = (currentPlayer == 'X') ? 'O' : 'X';
+            resetGame();
+            return;
+        }
+
+        // Game logic input
+        if (!gameOver)
+        {
+            float cellWidth = windowWidth / (float)BOARD_SIZE;
+            float cellHeight = windowHeight / (float)BOARD_SIZE;
+
+            int col = xpos / cellWidth;
+            int row = ypos / cellHeight;
+
+            if (row >= 0 && row < BOARD_SIZE && col >= 0 && col < BOARD_SIZE && board[row][col] == ' ')
+            {
+                board[row][col] = currentPlayer;
+                moveCount++;
+                checkWin();
+                if (!gameOver) currentPlayer = (currentPlayer == 'X') ? 'O' : 'X';
+            }
         }
     }
 }
+
 
 void renderBoard(unsigned int shaderProgram)
 {
@@ -193,6 +215,8 @@ void renderBoard(unsigned int shaderProgram)
         }
     }
 }
+
+drawRestartButton(shaderProgram);
 
 void drawGrid(unsigned int shaderProgram)
 {
@@ -337,6 +361,48 @@ void drawWinningLine(int row1, int col1, int row2, int col2, unsigned int shader
     glDeleteBuffers(1, &VBO);
 }
 
+//////restart button
+void drawRestartButton(unsigned int shaderProgram)
+{
+    float vertices[] = {
+        btnLeft, btnBottom,
+        btnRight, btnBottom,
+        btnRight, btnTop,
+        btnLeft, btnTop
+    };
+
+    unsigned int indices[] = {
+        0, 1, 2,
+        2, 3, 0
+    };
+
+    unsigned int VAO, VBO, EBO;
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
+
+    glBindVertexArray(VAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    int colorLoc = glGetUniformLocation(shaderProgram, "ourColor");
+    glUniform3f(colorLoc, 0.7f, 0.7f, 0.7f); // Light gray
+
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+    glDeleteVertexArrays(1, &VAO);
+    glDeleteBuffers(1, &VBO);
+    glDeleteBuffers(1, &EBO);
+}
+
+
 void checkWin()
 {
     // Check rows
@@ -402,3 +468,6 @@ void resetGame()
     moveCount = 0;
     winRow1 = winCol1 = winRow2 = winCol2 = -1;
 }
+
+
+
