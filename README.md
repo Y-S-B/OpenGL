@@ -1,11 +1,11 @@
 # 🎮 OpenGL Tic-Tac-Toe Game
 
 ## 👨‍💻 Team Member
-**Name:** *Lud Amare  UGR/0331/15*
-**Name:** *Sekina Murad  UGR/3475/15*
-**Name:** *Yanet Sisay  UGR/9157/15*
-**Name:** *Sofia Yasin  UGR/7314/15*
-**Name:** *Yasmin Anwar  UGR/7449/15*
+**Name:** Lud Amare  UGR/0331/15
+**Name:** Sekina Murad  UGR/3475/15
+**Name:** Yanet Sisay  UGR/9157/15
+**Name:** Sofia Yasin  UGR/7314/15
+**Name:** Yasmin Anwar  UGR/7449/15
 
 ## 📌 Project Overview
 
@@ -52,7 +52,7 @@ This is a simple interactive Tic-Tac-Toe game implemented using C++ and OpenGL (
 
 ## 📷 Screen Capture
 
-Uploading Recording 2025-06-11 175844.mp4…
+https://github.com/user-attachments/assets/4ba3638f-8940-460c-af1a-ad02842876dc
 
 *This video shows the gameplay, win detection, and restart button in action.*
 
@@ -77,7 +77,6 @@ Uploading Recording 2025-06-11 175844.mp4…
    g++ -o tictactoe main.cpp -lglfw -ldl -lGL
 
 3. Run the executable:
-
 
   ```bash
   ./tictactoe
